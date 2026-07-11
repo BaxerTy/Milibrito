@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitácora Poética - Libro Virtual</title>
+    <style>
+        /* Configuración General */
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+        }
+        body {
+            display: flex;
+            font-family: 'Georgia', serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Barra Lateral (Sub-pestañas con títulos) */
+        .sidebar {
+            width: 320px;
+            background-color: #1a1a1a;
+            border-right: 1px solid #2d2d2d;
+            display: flex;
+            flex-direction: column;
+            padding: 30px 20px;
+        }
+        .sidebar h2 {
+            font-size: 1.4rem;
+            margin-bottom: 25px;
+            color: #a13d3d; /* Rojo sutil poético */
+            font-weight: normal;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border-bottom: 1px solid #2d2d2d;
+            padding-bottom: 10px;
+        }
+        .lista-poemas {
+            list-style: none;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        .tab-poema {
+            padding: 14px 18px;
+            margin-bottom: 10px;
+            background-color: #222222;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-size: 0.95rem;
+            border-left: 3px solid transparent;
+            color: #b0b0b0;
+        }
+        .tab-poema:hover {
+            background-color: #2a2a2a;
+            color: #ffffff;
+            border-left-color: #555;
+        }
+        .tab-poema.activo {
+            background-color: #2d2d2d;
+            border-left-color: #a13d3d;
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        /* Área de Lectura Principal */
+        .contenido-principal {
+            flex-grow: 1;
+            padding: 60px;
+            overflow-y: auto;
+            display: flex;
+            justify-content: center;
+            background: radial-gradient(circle at top, #1c1c1c 0%, #121212 80%);
+        }
+        .visor-poema {
+            max-width: 650px;
+            width: 100%;
+            animation: fadeIn 0.4s ease;
+        }
+        .titulo-poema {
+            font-size: 2.4rem;
+            margin-bottom: 35px;
+            color: #ffffff;
+            font-weight: normal;
+            letter-spacing: 0.5px;
+        }
+        .texto-poema {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            white-space: pre-wrap; /* Esta propiedad mágica mantiene tus saltos de línea exactos */
+            color: #cccccc;
+            letter-spacing: 0.2px;
+        }
+
+        /* Animación suave al cambiar de poema */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Adaptación para Celulares */
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: 35vh; border-right: none; border-bottom: 1px solid #2d2d2d; }
+            .contenido-principal { padding: 40px 25px; height: 65vh; }
+            .titulo-poema { font-size: 1.9rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Menú de pestañas lateral -->
+    <div class="sidebar">
+        <h2>Índice</h2>
+        <ul class="lista-poemas" id="listaPoemas">
+            <!-- Las pestañas se crean solas aquí abajo con JavaScript -->
+        </ul>
+    </div>
+
+    <!-- Visor donde se lee el poema seleccionado -->
+    <div class="contenido-principal">
+        <div class="visor-poema" id="contenedorVisor">
+            <h1 class="titulo-poema" id="tituloVisor">Selecciona una obra</h1>
+            <div class="texto-poema" id="textoVisor">
+                Elige uno de los títulos del índice para comenzar la lectura.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =================================================================
+        // 🖋️ TU ACCESO ESPECIAL: AQUÍ PEGAS TUS POEMAS
+        // Para añadir un poema nuevo, solo cópiate un bloque completo
+        // entre llaves { ... }, ponle una coma al anterior y pégalo.
+        // =================================================================
+        const misPoemas = [
+            {
+                titulo: "Prólogo",
+                contenido: "Bienvenido a este espacio virtual.\n\nAquí se congregan los versos que nacen del desvelo, las palabras crudas y los fragmentos de historias que buscan un refugio directo en el lienzo digital, sin filtros ni censuras."
+            },
+            {
+                titulo: "Poema I: Eco en la Penumbra",
+                contenido: "En la esquina más profunda de la noche,\ndonde las verdades pesan más que el cuerpo,\nse dibuja tu silueta como un fugaz recuerdo.\n\nTan pequeño el roce, tan constante el eco,\nque no encuentro el momento\nde ordenar este silencio."
+            },
+            {
+                titulo: "Poema II: Tinta Visceral",
+                contenido: "Escribir no es adornar la ausencia,\nes abrir la herida en la hoja en blanco.\n\nDejar que el papel absorba el impacto\nde todo aquello que quema por dentro,\nhasta que el dolor se vuelva estructura\ny el verso, finalmente, descanse."
+            }
+        ];
+
+        // =================================================================
+        // LÓGICA DE LA PÁGINA (No necesitas tocar esto para que funcione)
+        // =================================================================
+        const listaUI = document.getElementById('listaPoemas');
+        const tituloVisor = document.getElementById('tituloVisor');
+        const textoVisor = document.getElementById('textoVisor');
+        const contenedorVisor = document.getElementById('contenedorVisor');
+
+        function generarMenu() {
+            listaUI.innerHTML = '';
+            misPoemas.forEach((poema, index) => {
+                const li = document.createElement('li');
+                li.className = 'tab-poema';
+                li.textContent = poema.titulo;
+                li.onclick = () => mostrarPoema(index, li);
+                listaUI.appendChild(li);
+            });
+        }
+
+        function mostrarPoema(index, elementoTab) {
+            // Quitar el estado activo de las otras pestañas
+            document.querySelectorAll('.tab-poema').forEach(tab => tab.classList.remove('activo'));
+            
+            // Activar la pestaña cliqueada
+            elementoTab.classList.add('activo');
+            
+            // Reiniciar animación del visor
+            contenedorVisor.style.animation = 'none';
+            void contenedorVisor.offsetHeight; // Truco para resetear animación
+            contenedorVisor.style.animation = 'fadeIn 0.4s ease';
+            
+            // Cargar los textos del poema correspondiente
+            tituloVisor.textContent = misPoemas[index].titulo;
+            textoVisor.textContent = misPoemas[index].contenido;
+        }
+
+        // Iniciar la página
+        generarMenu();
+
+        // Cargar el primer poema automáticamente al abrir la web
+        if(misPoemas.length > 0) {
+            const primerTab = document.querySelector('.tab-poema');
+            if(primerTab) mostrarPoema(0, primerTab);
+        }
+    </script>
+</body>
+</html>
